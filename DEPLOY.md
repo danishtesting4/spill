@@ -4,27 +4,38 @@ Everything is committed and ready (`main`, one clean commit). Two ways to land i
 
 ---
 
-## Option A — you do it (2 minutes, no secrets shared)
+## Option A — one command
 
-**With the GitHub CLI** (creates the repo *and* pushes):
+Requires the GitHub CLI ([install](https://cli.github.com)) and one login:
 
 ```bash
-gh auth login                       # once, if you haven't
+gh auth login          # once: GitHub.com → HTTPS → login with a browser
 cd spill-pages
+./deploy.sh
+```
+
+That single script:
+
+1. creates the public repo `spill` on your account (or reuses it if it exists)
+2. enables **Pages** with `build_type=workflow`
+3. sets **workflow permissions to read-and-write** — without this, approved drops never deploy
+4. turns **Issues** on (the moderation queue)
+5. pushes `main`
+6. waits for the first Pages run and prints the live URL
+
+Flags: `--name my-spill`, `--private`, `--dry-run` (prints the whole plan, changes nothing).
+
+No `gh`? Two alternatives:
+
+```bash
+# repo already created at github.com/new
+git remote add origin https://github.com/<you>/spill.git && git push -u origin main
+
+# or let the CLI do it in one line
 gh repo create spill --public --source=. --remote=origin --push
 ```
 
-**With plain git:**
-
-```bash
-cd spill-pages
-git remote add origin https://github.com/<you>/spill.git
-git push -u origin main
-```
-
-(If you downloaded the zip: unzip it first — the git history, `.github/` workflows and everything are inside.)
-
-Then turn the site on:
+…then set the three things by hand:
 
 | Where | Setting |
 | --- | --- |
