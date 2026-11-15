@@ -1,0 +1,149 @@
+[
+ {
+  "id": "p1",
+  "code": "published",
+  "type": "confession",
+  "title": "I have been pretending to like my best friend’s cooking for six years",
+  "body": "Every Sunday she makes the same dry chicken and I tell her it is the best meal of my week. She beams. I have never had the heart to say anything, and at this point the lie has more history than some of my relationships. Tonight she asked if I wanted the recipe and I said yes so fast I think I hurt her feelings.",
+  "alias": "feverish corridor #60",
+  "tags": [
+   "friendship",
+   "small lies"
+  ],
+  "status": "approved",
+  "felt": 412,
+  "same": 96,
+  "oof": 31,
+  "createdAt": 1794713275809,
+  "source": "published"
+ },
+ {
+  "id": "p2",
+  "code": "published",
+  "type": "expose",
+  "title": "Our “transparent” office raised prices and blamed the customers for noticing",
+  "body": "The pricing page changed at 2am on a Tuesday. Same product, same tier, 40% more. The email we all got said it was due to “market conditions”, but the slide deck that leaked into the shared drive lists “revenue capture on low-price-sensitivity cohorts” as the actual reason. I removed the names and the deck link on purpose. Screenshots are with a journalist I trust.",
+  "alias": "neon violin #78",
+  "tags": [
+   "work",
+   "pricing",
+   "receipts"
+  ],
+  "status": "approved",
+  "felt": 288,
+  "same": 143,
+  "oof": 77,
+  "createdAt": 1794709855809,
+  "source": "published"
+ },
+ {
+  "id": "p3",
+  "code": "published",
+  "type": "confession",
+  "title": "I keep a folder of every nice thing anyone has said to me",
+  "body": "Screenshots, texts, a few sticky notes I photographed before they got thrown away. It is 340 files now. I open it on bad nights. I have never told anyone because it feels pathetic, but it works better than any app I have tried.",
+  "alias": "restless signal #84",
+  "tags": [
+   "mental health",
+   "soft"
+  ],
+  "status": "approved",
+  "felt": 601,
+  "same": 204,
+  "oof": 12,
+  "createdAt": 1794702355809,
+  "source": "published"
+ },
+ {
+  "id": "p4",
+  "code": "published",
+  "type": "confession",
+  "title": "I quit the job I loved because my manager started copying my ideas out loud",
+  "body": "Three meetings in a row, my suggestion came out of his mouth forty minutes later as his own. I stopped speaking. Six weeks after I left, the project stalled and he emailed to ask what I had planned. I sent a one-word reply: “notes.”",
+  "alias": "neon switchboard #37",
+  "tags": [
+   "work",
+   "petty revenge"
+  ],
+  "status": "approved",
+  "felt": 355,
+  "same": 88,
+  "oof": 40,
+  "createdAt": 1794690955809,
+  "source": "published"
+ },
+ {
+  "id": "p5",
+  "code": "published",
+  "type": "expose",
+  "title": "The gym that charges you to cancel, and the fake “coach” they assign you",
+  "body": "Signed up in March, cancelled in June, still being billed in November. The cancellation form on their site returns a 500 error. The “coach” who calls to save your membership has been three different people with the same name and the same script. I have the invoices, the error logs and the call recordings. Names of individual staff removed — the company is the problem, not the teenager on the phone.",
+  "alias": "neon violin #65",
+  "tags": [
+   "money",
+   "consumer",
+   "receipts"
+  ],
+  "status": "approved",
+  "felt": 197,
+  "same": 162,
+  "oof": 58,
+  "createdAt": 1794673555809,
+  "source": "published"
+ },
+ {
+  "id": "p6",
+  "code": "published",
+  "type": "confession",
+  "title": "I read my partner’s diary once and I have been a better person since",
+  "body": "Two years ago I opened it looking for proof of something I was sure was happening. It was not happening. What was in there was a very long, very patient list of things I do that make them feel small. I never told them I read it. I just stopped doing all of it. We are better now, on a foundation I do not deserve.",
+  "alias": "crooked violin #40",
+  "tags": [
+   "relationships",
+   "guilt"
+  ],
+  "status": "approved",
+  "felt": 522,
+  "same": 71,
+  "oof": 210,
+  "createdAt": 1794654355809,
+  "source": "published"
+ },
+ {
+  "id": "p7",
+  "code": "published",
+  "type": "confession",
+  "title": "My cat is not a rescue, I found him behind a restaurant and made up a story",
+  "body": "Told everyone he came from a shelter in Bandung with a tragic backstory. He was eating discarded satay. His name is Kevin and he has never been tragic in his life.",
+  "alias": "quiet cassette #64",
+  "tags": [
+   "pets",
+   "small lies"
+  ],
+  "status": "approved",
+  "felt": 733,
+  "same": 118,
+  "oof": 9,
+  "createdAt": 1794631555809,
+  "source": "published"
+ },
+ {
+  "id": "p8",
+  "code": "published",
+  "type": "expose",
+  "title": "A “charity” run by a friend’s cousin that has never donated anything",
+  "body": "Public bank statements posted monthly, all screenshots, all suspiciously round numbers. The orphanage they name has no record of them. I am not naming anyone until a journalist looks; I am posting this because two people have already asked me privately whether it is real. It is not. Do not give them money.",
+  "alias": "neon window #25",
+  "tags": [
+   "scam",
+   "money",
+   "warning"
+  ],
+  "status": "approved",
+  "felt": 408,
+  "same": 231,
+  "oof": 88,
+  "createdAt": 1794606955809,
+  "source": "published"
+ }
+]

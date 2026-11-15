@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SPILL — anonymous confessions &amp; receipts</title>
+<meta name="description" content="Say the thing you can't say with your name on it. Anonymous confessions and evidence-first exposés, read by a human before they go live." />
+<meta name="theme-color" content="#07060b" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2307060b'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%2338f5d0'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ff3d84'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="aurora" aria-hidden="true">
+  <span class="orb orb-a"></span>
+  <span class="orb orb-b"></span>
+  <span class="orb orb-c"></span>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="staticbar">
+  <span class="staticbar-dot"></span>
+  <span><b>static build</b> — drops, votes and review decisions are stored in <i>this browser</i>. Nothing is sent anywhere.</span>
+  <a href="#rules">how publishing works</a>
+</div>
+
+<header class="topbar">
+  <a class="wordmark" href="#top">
+    <span class="dot"></span>SPILL
+    <span class="wordmark-sub">anonymous</span>
+  </a>
+  <nav class="topnav">
+    <a href="#feed">Feed</a>
+    <a href="#rules">Rules</a>
+    <button class="linkbtn" data-open-composer>My drops</button>
+  </nav>
+  <button class="btn btn-primary" data-open-composer>Spill something</button>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <p class="eyebrow"><span class="pulse"></span> anonymous · human-reviewed · no names, no doxxing</p>
+    <h1>Say the thing you can’t say<br /><em>with your name on it.</em></h1>
+    <p class="lede">
+      A wall for confessions you’ve been carrying, and exposés that come with receipts —
+      posted without your name, read by a person before they go live, and protected from
+      becoming someone’s worst week.
+    </p>
+    <div class="hero-actions">
+      <button class="btn btn-primary btn-lg" data-open-composer data-mode="confession">Confess something</button>
+      <button class="btn btn-ghost btn-lg" data-open-composer data-mode="expose">Expose something</button>
+    </div>
+    <dl class="stats" id="stats">
+      <div><dt>live drops</dt><dd data-stat="live">–</dd></div>
+      <div><dt>confessions</dt><dd data-stat="confessions">–</dd></div>
+      <div><dt>exposés</dt><dd data-stat="exposes">–</dd></div>
+      <div><dt>this week</dt><dd data-stat="week">–</dd></div>
+    </dl>
+  </section>
+
+  <section id="feed" class="feed">
+    <div class="feed-head">
+      <h2>Tonight’s wall</h2>
+      <div class="feed-tools">
+        <div class="segmented" role="tablist" aria-label="Filter by type">
+          <button role="tab" aria-selected="true" data-filter="all">All</button>
+          <button role="tab" aria-selected="false" data-filter="confession">Confessions</button>
+          <button role="tab" aria-selected="false" data-filter="expose">Exposés</button>
+        </div>
+        <label class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="search" type="search" placeholder="search the wall" aria-label="Search drops" />
+        </label>
+        <select id="sort" aria-label="Sort">
+          <option value="new">Newest</option>
+          <option value="felt">Most felt</option>
+        </select>
+      </div>
+    </div>
+    <div class="cards" id="cards" aria-live="polite"></div>
+    <p class="empty" id="empty" hidden>Nothing here yet. Be the first drop of the night.</p>
+  </section>
+
+  <section id="rules" class="rules">
+    <h2>House rules, briefly</h2>
+    <div class="rules-grid">
+      <article>
+        <span class="num">01</span>
+        <h3>No names. Ever.</h3>
+        <p>Emails, phone numbers, @handles and links are stripped automatically before a post is even queued. Names of private individuals aren’t allowed — companies, orgs and public officials are fair game.</p>
+      </article>
+      <article>
+        <span class="num">02</span>
+        <h3>Receipts over rage</h3>
+        <p>Exposés need something checkable: a document, a public record, a screenshot with the private details removed. “I heard that…” is a rumour, not an expose.</p>
+      </article>
+      <article>
+        <span class="num">03</span>
+        <h3>A human reads everything</h3>
+        <p>Every drop sits in a review queue first. Approved, rejected with a reason, or sent back — you can check the status of your drop any time with the code you get.</p>
+      </article>
+      <article>
+        <span class="num">04</span>
+        <h3>No violence, no sexual content involving minors, no targeting private people</h3>
+        <p>Those are removed, not argued with. If you’re in danger, this site is not a hotline — contact local emergency services.</p>
+      </article>
+    </div>
+    <div class="publish">
+      <h3>How a static site gets posts live</h3>
+      <p>
+        Two ways out of the browser. <b>Locally:</b> approve it in the
+        <a href="admin.html">moderation desk</a>, hit <em>export wall.json</em>, commit that file —
+        Pages republishes in a minute. <b>Through GitHub Actions:</b> use <em>Send via GitHub</em> in the
+        composer, and a workflow commits it for you once a moderator adds the <em>approve</em> label
+        to the issue. Same rules engine either way, and every published drop gets a code you can
+        look up from any device.
+      </p>
+    </div>
+
+    <div class="privacy">
+      <h3>What we keep</h3>
+      <p>
+        Your IP is only ever stored as a one-way hash, used to stop spam and duplicate voting — never to identify you,
+        never shown to anyone, and it isn’t linked to what you wrote in the public feed. No accounts, no email, no cookies
+        for visitors. Your drop code lives in your own browser.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>SPILL — static build · GitHub Pages ready · no server, no tracking</span>
+  <a href="admin.html">moderation desk</a>
+</footer>
+
+<!-- ── composer ─────────────────────────────────────────────── -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-scrim" data-close></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-x" data-close aria-label="Close">×</button>
+
+    <div id="composerView">
+      <p class="eyebrow">no account · no name · no trace</p>
+      <h2 id="modalTitle">Drop it in the dark.</h2>
+
+      <div class="type-toggle" role="radiogroup" aria-label="Kind of drop">
+        <button role="radio" aria-checked="true" data-type="confession" class="is-on">
+          <strong>Confession</strong>
+          <span>Something you did, felt or can’t say out loud. About you.</span>
+        </button>
+        <button role="radio" aria-checked="false" data-type="expose">
+          <strong>Exposé</strong>
+          <span>Something a company, org or public figure did — with receipts.</span>
+        </button>
+      </div>
+
+      <label class="field">
+        <span>Headline <b id="titleCount">0/90</b></span>
+        <input id="title" maxlength="90" placeholder="One sentence that makes someone stop scrolling" autocomplete="off" />
+      </label>
+
+      <label class="field">
+        <span>What happened <b id="bodyCount">0/1400</b></span>
+        <textarea id="body" maxlength="1400" rows="7" placeholder="Start anywhere. No names, no numbers, no links — those get removed automatically."></textarea>
+      </label>
+
+      <label class="field">
+        <span>Tags <i>up to 5, comma separated</i></span>
+        <input id="tags" placeholder="work, family, receipts" autocomplete="off" />
+      </label>
+
+      <div class="safety" id="safety">
+        <span class="safety-dot"></span>
+        <span id="safetyText">We’ll scan for names, numbers and links as you type.</span>
+      </div>
+
+      <label class="consent">
+        <input type="checkbox" id="consent" />
+        <span>This is a true story about my own experience or something I can back up. It targets no private individual, and I accept that a moderator may reject it.</span>
+      </label>
+
+      <div class="composer-actions">
+        <button class="btn btn-primary btn-lg" id="submit">Send to review</button>
+        <span class="hint">Saved in this browser — a draft, not a public post.</span>
+      </div>
+
+      <div class="publish-alt">
+        <div>
+          <strong>Want it on the public wall?</strong>
+          <span>
+            Push it through GitHub instead: a workflow scrubs it, queues it, and a moderator
+            publishes it with an <em>approve</em> label. Needs a GitHub account — use a throwaway.
+          </span>
+        </div>
+        <button class="btn btn-ghost" id="ghSubmit">Send via GitHub →</button>
+      </div>
+      <p class="form-error" id="formError" hidden></p>
+    </div>
+
+    <div id="successView" hidden>
+      <div class="success-mark">✓</div>
+      <h2>In the queue.</h2>
+      <p class="success-copy" id="successCopy"></p>
+      <div class="code-box">
+        <code id="codeOut">--------</code>
+        <button class="btn btn-ghost" id="copyCode">Copy</button>
+      </div>
+      <p class="hint">Save this code. It’s the only way to check your drop’s status — we can’t recover it for you.</p>
+      <div class="composer-actions">
+        <button class="btn btn-primary" id="trackFromSuccess">Check status</button>
+        <button class="btn btn-ghost" data-close>Back to the wall</button>
+      </div>
+    </div>
+
+    <div id="trackerView" hidden>
+      <p class="eyebrow">your drops</p>
+      <h2>Still in the dark.</h2>
+      <p class="hint">Only the drops you posted from this browser show up here.</p>
+      <div class="tracker-list" id="trackerList"></div>
+      <label class="field" style="margin-top:18px">
+        <span>Look up a code</span>
+        <div class="code-lookup">
+          <input id="codeInput" placeholder="paste your drop code" autocomplete="off" />
+          <button class="btn btn-ghost" id="codeGo">Look up</button>
+        </div>
+      </label>
+      <p class="form-error" id="trackError" hidden></p>
+      <div class="composer-actions">
+        <button class="btn btn-primary" data-close>Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<script src="store.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

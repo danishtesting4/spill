@@ -1,0 +1,63 @@
+name: Sweep stale drops
+
+on:
+  schedule:
+    - cron: '17 3 * * *'   # daily, 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Nudge and expire
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STALE_DAYS: ${{ vars.STALE_DAYS }}
+          NUDGE_DAYS: ${{ vars.NUDGE_DAYS }}
+        run: node scripts/sweep.mjs
+
+      - name: Commit
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git config user.name "spill-bot"
+          git config user.email "spill-bot@users.noreply.github.com"
+          git add -A data
+          git commit -m "chore(drop): sweep stale queue"
+          git push
+
+  deploy:
+    needs: sweep
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./
+      - id: deployment
+        uses: actions/deploy-pages@v4

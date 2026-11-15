@@ -1,0 +1,62 @@
+name: Ingest drop
+
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+
+permissions:
+  contents: write      # commit data/wall.json + data/pending
+  issues: write        # comment, label, close
+  pages: write         # redeploy the wall
+  id-token: write
+
+concurrency:
+  group: ingest-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run the pipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/ingest.mjs
+
+      - name: Commit repo-as-database changes
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git config user.name "spill-bot"
+          git config user.email "spill-bot@users.noreply.github.com"
+          git add -A data
+          git commit -m "chore(drop): ${{ github.event.action }} #${{ github.event.issue.number }}"
+          git push
+
+  deploy:
+    needs: ingest
+    if: github.event.action == 'labeled'
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./
+      - id: deployment
+        uses: actions/deploy-pages@v4

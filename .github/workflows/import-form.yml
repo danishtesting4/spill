@@ -1,0 +1,64 @@
+name: Import anonymous form submissions
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: import-form
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Turn new form rows into drops
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # prefer a secret (private Apps Script endpoint) and fall back to a variable
+          FORM_CSV_URL: ${{ secrets.FORM_CSV_URL || vars.FORM_CSV_URL }}
+          FORM_MAX_PER_RUN: ${{ vars.FORM_MAX_PER_RUN }}
+        run: node scripts/import-form.mjs
+
+      - name: Commit
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "Nothing new."
+            exit 0
+          fi
+          git config user.name "spill-bot"
+          git config user.email "spill-bot@users.noreply.github.com"
+          git add -A data
+          git commit -m "chore(drop): import form submissions"
+          git push
+
+  deploy:
+    needs: import
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./
+      - id: deployment
+        uses: actions/deploy-pages@v4
