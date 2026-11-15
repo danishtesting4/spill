@@ -1,0 +1,19 @@
+{
+ "issue": 1,
+ "code": "zrspeafp3x",
+ "alias": "feverish harbour #12",
+ "type": "confession",
+ "title": "[TEST] deployment check, please ignore",
+ "body": "This is an automated smoke test of the SPILL pipeline. It should be scrubbed, queued, approved, published and then removed again. Contact me at [email removed] or [number removed] if it does not.",
+ "tags": [
+  "test",
+  "deployment"
+ ],
+ "redactions": [
+  "email",
+  "phone"
+ ],
+ "flags": [],
+ "createdAt": 1794719222535,
+ "author": "danishtesting4"
+}
