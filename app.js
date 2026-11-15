@@ -61,6 +61,7 @@ async function loadFeed() {
     const data = await SpillStore.feed({ type: state.type, sort: state.sort, q: state.q });
     wrap.replaceChildren(...data.posts.map(card));
     $('#empty').hidden = data.posts.length > 0;
+    focusFromHash();
   } catch {
     wrap.replaceChildren();
     $('#empty').hidden = false;
@@ -68,8 +69,37 @@ async function loadFeed() {
   }
 }
 
+/* A stable, shareable link to one drop: page#post-id */
+function permalink(post) {
+  return `${location.origin}${location.pathname}#${post.id}`;
+}
+
+async function copyLink(post) {
+  const url = permalink(post);
+  try {
+    await navigator.clipboard.writeText(url);
+    history.replaceState(null, '', '#' + post.id);
+    toast('Link to this drop copied.');
+  } catch {
+    toast(url);
+  }
+}
+
+/* Highlight whatever the URL points at, e.g. .../confessions.html#p3 */
+function focusFromHash() {
+  const id = (location.hash || '').replace('#', '');
+  if (!id) return;
+  const node = $$('.card').find((c) => c.dataset.postId === id);
+  if (!node) return;
+  node.classList.remove('is-target');
+  void node.offsetWidth;
+  node.classList.add('is-target');
+  node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function card(post) {
   const node = el('article', 'card' + (post.type === 'expose' ? ' is-expose' : ''));
+  node.dataset.postId = post.id;
 
   const top = el('div', 'card-top');
   top.append(el('span', 'pill', post.type === 'expose' ? 'Exposé' : 'Confession'));
@@ -118,6 +148,11 @@ function card(post) {
   flag.addEventListener('click', () => report(post.id, flag));
   foot.append(flag);
 
+  const link = el('button', 'cardlink', '🔗');
+  link.title = 'Copy a link to this drop';
+  link.addEventListener('click', () => copyLink(post));
+  foot.append(link);
+
   node.append(foot);
   return node;
 }
@@ -156,6 +191,10 @@ async function loadStats() {
       const node = $(`[data-stat="${k}"]`);
       if (node) node.textContent = Number(v).toLocaleString();
     }
+    const conf = $('#wallCountConf');
+    const exp = $('#wallCountExp');
+    if (conf) conf.textContent = Number(data.confessions || 0).toLocaleString();
+    if (exp) exp.textContent = Number(data.exposes || 0).toLocaleString();
   } catch { /* leave dashes */ }
 }
 
@@ -468,6 +507,8 @@ setType('confession');
 updateCounts();
 loadFeed();
 loadStats();
+
+window.addEventListener('hashchange', focusFromHash);
 
 /* arriving from a wall page via "Spill something" */
 if (location.hash === '#compose') {

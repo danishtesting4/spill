@@ -17,6 +17,17 @@ GitHub Pages serves the site, GitHub Actions does the backend work, and the repo
 Each wall is a real, standalone page — linkable, searchable, and safe to share on its own. They all read
 `data/wall.json`, so publishing once updates every wall.
 
+**Opening them as links:** every page carries the same nav (Feed · Confessions · Exposés · Rules), the landing
+page has two big link cards with live counts, and the desk links out to both walls. On phones the nav stops
+being hidden and becomes a horizontally scrollable pill row, so nothing is unreachable on a small screen.
+GitHub Pages also serves extensionless URLs, so `/confessions` and `/exposes` work as well as the `.html`
+forms (keep the `.html` in `href`s — it's the only form that also works when you preview locally with
+`python3 -m http.server`).
+
+**Linking to one drop:** every card has a 🔗 button that copies `…/confessions.html#p3`. Opening that URL
+scrolls to that drop and flashes a highlight. Stored drops keep their id across rebuilds; if a drop is hidden
+or removed, the link lands on the wall with the post gone rather than erroring.
+
 ## The moderation desk (`admin.html`, password `nightfall`)
 
 | Tab | What it does |

@@ -649,7 +649,7 @@ select#sort option { background: var(--panel-solid); }
 .toast[hidden] { display: none; }
 
 @media (max-width: 700px) {
-  .topnav a { display: none; }
+  /* nav stays visible — it becomes a scrollable pill row below */
   .stats { grid-template-columns: repeat(2, 1fr); }
   .feed-head { align-items: flex-start; }
   .search input { width: 100px; }
@@ -765,3 +765,119 @@ code {
 }
 .wall-note b { color: var(--ink); }
 .cards.compact { columns: 3; }
+
+/* ── walls as links ─────────────────────────────────────── */
+.walls-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  padding: 8px 0 clamp(30px, 5vw, 52px);
+}
+.wall-link {
+  position: relative;
+  display: block;
+  padding: 26px 26px 24px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012));
+  overflow: hidden;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.22s ease, box-shadow 0.3s ease;
+}
+.wall-link::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--cyan);
+  box-shadow: 0 0 22px var(--cyan);
+}
+.wall-link.is-expose::before { background: var(--magenta); box-shadow: 0 0 22px var(--magenta); }
+.wall-link:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-strong);
+  box-shadow: 0 26px 60px -30px rgba(0, 0, 0, 0.95);
+}
+.wall-link .wall-count {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.12);
+  font-variant-numeric: tabular-nums;
+}
+.wall-link h2 { font-size: 1.15rem; margin-bottom: 8px; }
+.wall-link p { font-size: 13.5px; color: var(--muted); max-width: 34ch; }
+.wall-link .wall-go {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--cyan);
+}
+.wall-link.is-expose .wall-go { color: var(--magenta); }
+
+/* per-drop link + deep-link highlight */
+.cardlink {
+  background: none;
+  border: 0;
+  color: var(--muted-2);
+  font-size: 11.5px;
+  padding: 4px 6px;
+  margin-left: 4px;
+}
+.cardlink:hover { color: var(--cyan); }
+.card.is-target {
+  border-color: rgba(56, 245, 208, 0.55);
+  box-shadow: 0 0 0 1px rgba(56, 245, 208, 0.3), 0 24px 60px -28px rgba(0, 0, 0, 0.95);
+  animation: targetFlash 1.4s ease-out 1;
+}
+@keyframes targetFlash {
+  0% { box-shadow: 0 0 0 0 rgba(56, 245, 208, 0.55); }
+  100% { box-shadow: 0 0 0 16px rgba(56, 245, 208, 0); }
+}
+
+/* ── mobile: the nav must stay reachable ────────────────── */
+@media (max-width: 700px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  .wordmark-sub { display: none; }
+  .topnav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .topnav::-webkit-scrollbar { display: none; }
+  .topnav a,
+  .topnav .linkbtn {
+    display: inline-block;
+    flex: none;
+    padding: 7px 13px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.045);
+    white-space: nowrap;
+  }
+  .topnav a.is-current {
+    color: #06070c;
+    background: var(--ink);
+    border-color: transparent;
+  }
+  .topnav a.is-current::after { display: none; }
+  .topbar .btn-primary { padding: 9px 15px; font-size: 13px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .wall-link .wall-count { font-size: 1.6rem; }
+}

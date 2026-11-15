@@ -51,9 +51,37 @@ function toast(msg) {
   toastTimer = setTimeout(() => (t.hidden = true), 2800);
 }
 
+/* ── permalinks ─────────────────────────────────────────── */
+function permalink(post) {
+  return `${location.origin}${location.pathname}#${post.id}`;
+}
+
+async function copyLink(post) {
+  const url = permalink(post);
+  try {
+    await navigator.clipboard.writeText(url);
+    history.replaceState(null, '', '#' + post.id);
+    toast('Link to this drop copied.');
+  } catch {
+    toast(url);
+  }
+}
+
+function focusFromHash() {
+  const id = (location.hash || '').replace('#', '');
+  if (!id) return;
+  const node = $$('#wall .card').find((c) => c.dataset.postId === id);
+  if (!node) return;
+  node.classList.remove('is-target');
+  void node.offsetWidth;
+  node.classList.add('is-target');
+  node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 /* ── card ───────────────────────────────────────────────── */
 function card(post) {
   const node = el('article', 'card' + (post.type === 'expose' ? ' is-expose' : ''));
+  node.dataset.postId = post.id;
 
   const top = el('div', 'card-top');
   top.append(el('span', 'pill', post.type === 'expose' ? 'Exposé' : 'Confession'));
@@ -115,6 +143,12 @@ function card(post) {
     }
   });
   foot.append(flag);
+
+  const link = el('button', 'cardlink', '🔗');
+  link.title = 'Copy a link to this drop';
+  link.addEventListener('click', () => copyLink(post));
+  foot.append(link);
+
   node.append(foot);
   return node;
 }
@@ -135,6 +169,7 @@ async function render() {
   } else {
     $('#empty').hidden = true;
     grid.replaceChildren(...posts.map(card));
+    focusFromHash();
   }
 
   // hero numbers, from the unfiltered set
@@ -150,7 +185,8 @@ $$('.segmented button').forEach((btn) =>
   btn.addEventListener('click', () => {
     state.sort = btn.dataset.sort;
     $$('.segmented button').forEach((b) => b.setAttribute('aria-selected', String(b === btn)));
-    render();
+    window.addEventListener('hashchange', focusFromHash);
+render();
   })
 );
 
@@ -158,7 +194,9 @@ let timer;
 $('#search').addEventListener('input', (e) => {
   clearTimeout(timer);
   const v = e.target.value.trim();
-  timer = setTimeout(() => { state.q = v; render(); }, 220);
+  timer = setTimeout(() => { state.q = v; window.addEventListener('hashchange', focusFromHash);
+render(); }, 220);
 });
 
+window.addEventListener('hashchange', focusFromHash);
 render();
