@@ -20,6 +20,13 @@ const SpillStore = (() => {
   const DEFAULT_PASS = 'nightfall';
   const WALL_URL = './data/wall.json';
 
+  /* GitHub Pages serves with cache-control: max-age=600, so a plain fetch can
+     hand back a wall that is ten minutes stale — long after a drop was approved.
+     Bucket the query string by the minute: the CDN sees a new URL often enough
+     to stay fresh, and repeat loads inside the same minute still hit cache. */
+  const bucket = () => Math.floor(Date.now() / 60000);
+  const fresh = (path) => `${path}?v=${bucket()}`;
+
   let memory = {}; // fallback when localStorage is unavailable
   function read(key, fallback) {
     try {
@@ -73,7 +80,7 @@ const SpillStore = (() => {
   async function published() {
     if (wallCache) return wallCache;
     try {
-      const res = await fetch(WALL_URL, { cache: 'no-store' });
+      const res = await fetch(fresh(WALL_URL), { cache: 'no-store' });
       if (!res.ok) throw new Error('no wall');
       const data = await res.json();
       wallCache = Array.isArray(data) ? data : [];
@@ -246,7 +253,7 @@ const SpillStore = (() => {
   async function dropsIndex() {
     if (dropsCache) return dropsCache;
     try {
-      const res = await fetch('./data/drops.json', { cache: 'no-store' });
+      const res = await fetch(fresh('./data/drops.json'), { cache: 'no-store' });
       const data = await res.json();
       dropsCache = Array.isArray(data) ? data : [];
     } catch {
