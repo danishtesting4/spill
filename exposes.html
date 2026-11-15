@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Exposés — SPILL</title>
+<meta name="description" content="The exposé wall: what companies, organisations and public figures actually did — with something checkable behind each claim." />
+<meta name="theme-color" content="#07060b" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2307060b'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ff3d84'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2338f5d0'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-wall="expose">
+<div class="aurora" aria-hidden="true"><span class="orb orb-a"></span><span class="orb orb-b"></span><span class="orb orb-c"></span></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="staticbar">
+  <span class="staticbar-dot"></span>
+  <span><b>receipts required</b> — every exposé here was reviewed for a checkable claim. Names of private people are stripped.</span>
+  <a href="index.html#rules">the house rules</a>
+</div>
+
+<header class="topbar">
+  <a class="wordmark" href="index.html"><span class="dot"></span>SPILL</a>
+  <nav class="topnav">
+    <a href="index.html">Mixed wall</a>
+    <a href="confessions.html">Confessions</a>
+    <a href="exposes.html" class="is-current">Exposés</a>
+    <a href="admin.html">Desk</a>
+  </nav>
+  <a class="btn btn-primary" href="index.html#compose">Expose something</a>
+</header>
+
+<main>
+  <section class="wall-hero is-expose">
+    <p class="eyebrow"><span class="pulse"></span> the exposé wall</p>
+    <h1>What they did,<br /><em>and what proves it.</em></h1>
+    <p class="lede">
+      Companies, organisations and public figures only. Each post has something behind it a reader could
+      check — a document, a public record, a trail of invoices. Private individuals never get named here,
+      and anything that looked like doxxing was stripped before review.
+    </p>
+    <dl class="stats">
+      <div><dt>on this wall</dt><dd id="statLive">–</dd></div>
+      <div><dt>reactions</dt><dd id="statReactions">–</dd></div>
+      <div><dt>this week</dt><dd id="statWeek">–</dd></div>
+    </dl>
+    <p class="wall-note">
+      ⚑ Think a post here is wrong or unsafe? Hit <b>report</b> on the card — reports go straight to the top
+      of the moderation queue.
+    </p>
+  </section>
+
+  <section class="feed">
+    <div class="feed-head">
+      <h2>All exposés</h2>
+      <div class="feed-tools">
+        <div class="segmented" role="tablist" aria-label="Sort">
+          <button role="tab" aria-selected="true" data-sort="new">Newest</button>
+          <button role="tab" aria-selected="false" data-sort="felt">Most felt</button>
+        </div>
+        <label class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="search" type="search" placeholder="search exposés" aria-label="Search exposés" />
+        </label>
+      </div>
+    </div>
+    <div class="cards" id="wall" aria-live="polite"></div>
+    <p class="empty" id="empty" hidden></p>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>SPILL — accusations need evidence; without it this is just a rumour with a font.</span>
+  <a href="confessions.html">see the confession wall →</a>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+<script src="store.js"></script>
+<script src="wall.js"></script>
+</body>
+</html>

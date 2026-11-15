@@ -1,13 +1,20 @@
 'use strict';
 
 /* Moderation desk — static build.
-   Sessions live in sessionStorage; the password gate is cosmetic
-   (there is no server to enforce anything), and every decision is
-   written to this browser's localStorage by store.js. */
+   Sessions live in sessionStorage; the password gate is cosmetic (there is no
+   server to enforce anything), and every decision is written to this browser's
+   localStorage by store.js.
+
+   Tabs: Queue (pending + reported) · Confessions · Exposés · Log · Publish. */
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const SESSION = 'spill.v1.session';
+
+const ui = {
+  sort: { confession: 'new', expose: 'new' },
+  q: { confession: '', expose: '' },
+};
 
 let toastTimer;
 function toast(msg) {
@@ -23,7 +30,10 @@ function el(tag, cls, text) {
   if (text != null) n.textContent = text;
   return n;
 }
+const fmt = (n) => Number(n || 0).toLocaleString();
+const when = (ts) => new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
+/* ── auth ───────────────────────────────────────────────── */
 function showLogin() {
   $('#login').hidden = false;
   $('#desk').hidden = true;
@@ -31,7 +41,7 @@ function showLogin() {
 function showDesk() {
   $('#login').hidden = true;
   $('#desk').hidden = false;
-  loadQueue();
+  refreshAll();
 }
 
 $('#loginBtn').addEventListener('click', () => {
@@ -54,43 +64,62 @@ $('#logout').addEventListener('click', () => {
   sessionStorage.removeItem(SESSION);
   showLogin();
 });
-$('#refresh').addEventListener('click', loadQueue);
+$('#refresh').addEventListener('click', () => {
+  refreshAll();
+  toast('Refreshed.');
+});
 
+/* ── tabs ───────────────────────────────────────────────── */
 $$('.tabs button').forEach((b) =>
   b.addEventListener('click', () => {
     $$('.tabs button').forEach((x) => x.classList.toggle('on', x === b));
-    $('#queueWrap').hidden = b.dataset.tab !== 'queue';
-    $('#recentWrap').hidden = b.dataset.tab !== 'recent';
-    $('#publishWrap').hidden = b.dataset.tab !== 'publish';
-    if (b.dataset.tab === 'recent') loadRecent();
+    const tab = b.dataset.tab;
+    $('#queueWrap').hidden = tab !== 'queue';
+    $('#confessionsWrap').hidden = tab !== 'confessions';
+    $('#exposesWrap').hidden = tab !== 'exposes';
+    $('#recentWrap').hidden = tab !== 'recent';
+    $('#publishWrap').hidden = tab !== 'publish';
+    if (tab === 'recent') loadRecent();
+    if (tab === 'confessions') loadLive('confession');
+    if (tab === 'exposes') loadLive('expose');
   })
 );
 
-async function loadQueue() {
+/* ── everything ─────────────────────────────────────────── */
+async function refreshAll() {
+  const stats = await SpillStore.stats();
   const { queue } = await SpillStore.adminQueue();
-  const wrap = $('#queue');
-  wrap.replaceChildren();
+  const conf = (await SpillStore.adminAll({ type: 'confession' })).posts;
+  const exp = (await SpillStore.adminAll({ type: 'expose' })).posts;
 
-  const pending = queue.filter((q) => q.status === 'pending');
-  const reported = queue.filter((q) => q.status !== 'pending' && q.reports > 0);
-  const chip = (label, value) => {
-    const c = el('span', 'chip');
-    c.append(label + ' ', el('b', null, String(value)));
+  const chip = (label, value, cls = '') => {
+    const c = el('span', 'chip' + cls);
+    c.append(label + ' ', el('b', null, fmt(value)));
     return c;
   };
   $('#deskStats').replaceChildren(
-    chip('pending', pending.length),
-    chip('reported', reported.length),
-    chip('flagged for scrutiny', queue.filter((q) => q.flagged).length)
+    chip('live drops', stats.live),
+    chip('confessions', conf.length, ' conf'),
+    chip('exposés', exp.length, ' exp'),
+    chip('pending', queue.filter((q) => q.status === 'pending').length),
+    chip('reported', queue.filter((q) => q.reports > 0).length)
   );
 
-  try {
-    const stats = await SpillStore.stats();
-    $('#countApproved').textContent = String(stats.live);
-  } catch { /* ignore */ }
+  $('#nQueue').textContent = queue.filter((q) => q.status === 'pending').length || '';
+  $('#nConf').textContent = conf.length;
+  $('#nExp').textContent = exp.length;
 
+  renderQueue(queue);
+  renderLive('confession', conf);
+  renderLive('expose', exp);
+}
+
+/* ── queue ──────────────────────────────────────────────── */
+function renderQueue(queue) {
+  const wrap = $('#queue');
+  wrap.replaceChildren();
   if (!queue.length) {
-    wrap.append(el('p', 'hint', 'Queue is empty. The wall is calm.'));
+    wrap.append(el('p', 'empty-note', 'Queue is empty. The wall is calm.'));
     return;
   }
   for (const post of queue) wrap.append(qcard(post));
@@ -133,7 +162,7 @@ function qcard(post) {
     try {
       await SpillStore.setStatus(post.id, 'approve');
       toast('Approved. Export wall.json to make it public.');
-      loadQueue();
+      refreshAll();
     } catch (e) {
       approve.disabled = false;
       toast(e.message);
@@ -144,7 +173,7 @@ function qcard(post) {
     try {
       await SpillStore.setStatus(post.id, 'reject', reason.value.trim());
       toast('Rejected.');
-      loadQueue();
+      refreshAll();
     } catch (e) {
       reject.disabled = false;
       toast(e.message);
@@ -157,7 +186,7 @@ function qcard(post) {
     undo.addEventListener('click', async () => {
       await SpillStore.setStatus(post.id, 'pending');
       toast('Returned to queue.');
-      loadQueue();
+      refreshAll();
     });
     actions.append(undo);
   }
@@ -165,18 +194,121 @@ function qcard(post) {
   return node;
 }
 
+/* ── live walls (confessions / exposés) ─────────────────── */
+function renderLive(kind, posts) {
+  const list = kind === 'confession' ? $('#confessionsList') : $('#exposesList');
+  const summary = kind === 'confession' ? $('#confSummary') : $('#exposeSummary');
+  const q = ui.q[kind];
+  const sort = ui.sort[kind];
+
+  let rows = posts.slice();
+  if (q) {
+    const needle = q.toLowerCase();
+    rows = rows.filter((p) => (p.title + ' ' + p.body + ' ' + (p.tags || []).join(' ')).toLowerCase().includes(needle));
+  }
+  rows.sort((a, b) =>
+    sort === 'felt'
+      ? b.reactions.felt * 2 + b.reactions.same - (a.reactions.felt * 2 + a.reactions.same)
+      : b.createdAt - a.createdAt
+  );
+
+  const hiddenCount = rows.filter((p) => p.hidden).length;
+  const reactionTotal = rows.reduce((n, p) => n + p.reactions.felt + p.reactions.same + p.reactions.oof, 0);
+  summary.textContent = `${rows.length} shown · ${fmt(reactionTotal)} reactions` + (hiddenCount ? ` · ${hiddenCount} hidden` : '');
+
+  list.replaceChildren();
+  if (!rows.length) {
+    list.append(el('p', 'empty-note', q ? `Nothing matches “${q}”.` : 'Nothing live here yet.'));
+    return;
+  }
+
+  for (const post of rows) {
+    const row = el(
+      'div',
+      `live-row is-${post.type}` + (post.hidden ? ' is-hidden' : '')
+    );
+
+    const top = el('div', 'live-top');
+    top.append(el('span', 'pill', post.type === 'expose' ? 'Exposé' : 'Confession'));
+    top.append(el('span', 'alias', post.alias || 'anonymous'));
+    top.append(el('span', 'tcode', post.source === 'local' ? 'local draft' : 'published'));
+    if (post.hidden) top.append(el('span', 'status expired', 'hidden'));
+    top.append(el('span', 'time', when(post.createdAt)));
+    row.append(top);
+
+    row.append(el('h3', null, post.title));
+    row.append(el('p', 'live-body', post.body));
+
+    if (post.tags?.length) {
+      const tags = el('div', 'tags');
+      post.tags.forEach((t) => tags.append(el('span', 'tag', '#' + t)));
+      row.append(tags);
+    }
+
+    const actions = el('div', 'live-actions');
+    const stats = el('span', 'stat-mini', `♥ ${fmt(post.reactions.felt)} · = ${fmt(post.reactions.same)} · ! ${fmt(post.reactions.oof)}`);
+    actions.append(stats);
+
+    const expand = el('button', 'btn btn-ghost', 'Read all');
+    expand.addEventListener('click', () => {
+      row.classList.toggle('open');
+      expand.textContent = row.classList.contains('open') ? 'Collapse' : 'Read all';
+    });
+    actions.append(expand);
+
+    const toggle = el('button', 'btn ' + (post.hidden ? 'btn-ghost' : 'btn-reject'), post.hidden ? 'Put back on the wall' : 'Hide from wall');
+    toggle.addEventListener('click', () => {
+      if (post.hidden) SpillStore.unhide(post.id);
+      else SpillStore.hide(post.id);
+      toast(post.hidden ? 'Back on the wall — regenerate wall.json to publish.' : 'Hidden — regenerate wall.json to publish.');
+      refreshAll();
+    });
+    actions.append(toggle);
+
+    row.append(actions);
+    list.append(row);
+  }
+}
+
+async function loadLive(kind) {
+  const { posts } = await SpillStore.adminAll({ type: kind });
+  renderLive(kind, posts);
+}
+
+$$('.live-search').forEach((input) =>
+  input.addEventListener('input', () => {
+    clearTimeout(input._t);
+    input._t = setTimeout(() => {
+      const kind = input.dataset.kind;
+      ui.q[kind] = input.value.trim();
+      loadLive(kind);
+    }, 200);
+  })
+);
+
+$$('.segmented button').forEach((btn) =>
+  btn.addEventListener('click', () => {
+    const wrap = btn.closest('div[id$="Wrap"]');
+    const kind = wrap && wrap.id === 'exposesWrap' ? 'expose' : 'confession';
+    ui.sort[kind] = btn.dataset.sort;
+    $$('.segmented button', wrap).forEach((b) => b.setAttribute('aria-selected', String(b === btn)));
+    loadLive(kind);
+  })
+);
+
+/* ── log ────────────────────────────────────────────────── */
 async function loadRecent() {
   const { recent } = await SpillStore.adminRecent();
   const wrap = $('#recent');
   wrap.replaceChildren();
-  if (!recent.length) return wrap.append(el('p', 'hint', 'No decisions yet.'));
+  if (!recent.length) return wrap.append(el('p', 'empty-note', 'No decisions yet.'));
   for (const r of recent) {
     const row = el('div', 'recent-row');
     row.append(el('span', 'tcode', r.code));
     row.append(el('span', 'ttl', r.title));
     row.append(el('span', 'status ' + r.status, r.status));
     row.append(el('span', 'hint', r.reason || ''));
-    row.append(el('span', 'hint', '♥ ' + (r.felt || 0)));
+    row.append(el('span', 'hint', '♥ ' + fmt(r.felt)));
     wrap.append(row);
   }
 }
@@ -185,7 +317,8 @@ async function loadRecent() {
 $('#genWall').addEventListener('click', async () => {
   const json = await SpillStore.exportWall();
   $('#wallOut').value = json;
-  toast('Merged. Copy it into data/wall.json and commit.');
+  const hidden = SpillStore.hiddenIds().length;
+  toast(hidden ? `Merged, with ${hidden} hidden drop(s) left out.` : 'Merged. Copy it into data/wall.json and commit.');
 });
 
 $('#copyWall').addEventListener('click', async () => {
@@ -212,8 +345,8 @@ $('#downloadWall').addEventListener('click', async () => {
 $('#resetAll').addEventListener('click', () => {
   SpillStore.resetLocal();
   $('#wallOut').value = '';
-  loadQueue();
-  toast('Local drops, votes and decisions cleared.');
+  refreshAll();
+  toast('Local drops, votes, hidden flags and decisions cleared.');
 });
 
 $('#savePass').addEventListener('click', () => {

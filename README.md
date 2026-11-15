@@ -5,6 +5,32 @@ GitHub Pages serves the site, GitHub Actions does the backend work, and the repo
 
 ---
 
+## The walls
+
+| Page | What's on it |
+| --- | --- |
+| `index.html` | mixed feed, composer, drop-code tracker, house rules |
+| `confessions.html` | confession-only wall: own hero, live counts, sort by newest / most felt, search |
+| `exposes.html` | exposé-only wall, with the receipts framing and a report reminder |
+| `admin.html` | moderation desk (see below) |
+
+Each wall is a real, standalone page — linkable, searchable, and safe to share on its own. They all read
+`data/wall.json`, so publishing once updates every wall.
+
+## The moderation desk (`admin.html`, password `nightfall`)
+
+| Tab | What it does |
+| --- | --- |
+| **Queue** | pending drops + anything reported, approve / reject with a reason / send back |
+| **Confessions** | every live confession: alias, date, reaction counts, full text, search, sort |
+| **Exposés** | every live exposé, same controls, plus hide-from-wall for claims that stop being safe |
+| **Log** | last 40 decisions with reasons |
+| **Publish & settings** | merge approvals into `wall.json` (hidden drops excluded), copy/download, password, reset |
+
+Hiding a post marks it locally and leaves it out of the next `wall.json` export — regenerate and commit to
+make it disappear from the public site. Counts for both kinds are in the header chips, so you can see the
+shape of the wall at a glance (e.g. *confessions 5 · exposés 3 · pending 2*).
+
 ## Three ways a drop can travel
 
 | Path | Who can post | Where it lives | Publish step |
@@ -106,8 +132,11 @@ better than a GitHub account, not equal to Tor.
 
 ```
 spill-pages/
-├─ index.html                  # wall, composer (local draft + GitHub route), drop-code tracker, rules
-├─ admin.html                  # local moderation desk: queue, approve/reject, wall.json exporter
+├─ index.html                  # mixed wall, composer (local draft + GitHub route), drop-code tracker, rules
+├─ confessions.html            # confession wall
+├─ exposes.html                # exposé wall
+├─ wall.js                     # shared renderer for the two standalone walls
+├─ admin.html                  # moderation desk: queue, live confessions, live exposés, log, publish
 ├─ styles.css                  # the whole design system
 ├─ store.js                    # browser data layer: localStorage + data/wall.json + data/drops.json
 ├─ app.js · admin.js           # UI logic

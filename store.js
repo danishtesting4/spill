@@ -15,6 +15,7 @@ const SpillStore = (() => {
     posts: 'spill.v1.posts',
     reactions: 'spill.v1.reactions',
     seeded: 'spill.v1.seeded',
+    hidden: 'spill.v1.hidden',
     pass: 'spill.v1.adminpass',
   };
   const DEFAULT_PASS = 'nightfall';
@@ -315,6 +316,45 @@ const SpillStore = (() => {
   }
 
   /* ── moderation desk ──────────────────────────────────── */
+
+  /* Everything that is live right now — the wall.json posts plus anything
+     approved locally — so the desk can browse both kinds, not just the queue. */
+  async function adminAll({ type = 'all', q = '', sort = 'new' } = {}) {
+    const hidden = new Set(read(K.hidden, []));
+    let list = (await allPosts())
+      .filter((p) => p.status === 'approved')
+      .map((p) => ({ ...shape(p), hidden: hidden.has(p.id) }));
+
+    if (type !== 'all') list = list.filter((p) => p.type === type);
+    if (q) {
+      const needle = q.toLowerCase();
+      list = list.filter((p) =>
+        (p.title + ' ' + p.body + ' ' + (p.tags || []).join(' ')).toLowerCase().includes(needle)
+      );
+    }
+    list.sort((a, b) =>
+      sort === 'felt'
+        ? b.reactions.felt * 2 + b.reactions.same - (a.reactions.felt * 2 + a.reactions.same)
+        : b.createdAt - a.createdAt
+    );
+    return { posts: list };
+  }
+
+  function hide(id) {
+    const set = new Set(read(K.hidden, []));
+    set.add(id);
+    write(K.hidden, [...set]);
+    return { hidden: true };
+  }
+  function unhide(id) {
+    const set = new Set(read(K.hidden, []));
+    set.delete(id);
+    write(K.hidden, [...set]);
+    return { hidden: false };
+  }
+  function hiddenIds() {
+    return read(K.hidden, []);
+  }
   async function adminQueue() {
     const posts = await allPosts();
     return {
@@ -380,8 +420,9 @@ const SpillStore = (() => {
 
   /* ── publishing: turn local approved drops into wall.json ─ */
   async function exportWall() {
-    const publishedRows = await published();
-    const local = read(K.posts, []).filter((p) => p.status === 'approved');
+    const hidden = new Set(read(K.hidden, []));
+    const publishedRows = (await published()).filter((p) => !hidden.has(p.id));
+    const local = read(K.posts, []).filter((p) => p.status === 'approved' && !hidden.has(p.id));
     const merged = [
       ...publishedRows,
       ...local.map((p, i) => ({
@@ -410,14 +451,14 @@ const SpillStore = (() => {
     write(K.pass, value || DEFAULT_PASS);
   }
   function resetLocal() {
-    [K.posts, K.reactions, K.seeded].forEach((k) => {
+    [K.posts, K.reactions, K.seeded, K.hidden].forEach((k) => {
       try { localStorage.removeItem(k); } catch { delete memory[k]; }
     });
   }
 
   return {
     feed, stats, create, lookup, react, report,
-    adminQueue, adminRecent, setStatus, exportWall,
+    adminQueue, adminRecent, adminAll, setStatus, hide, unhide, hiddenIds, exportWall,
     getPass, setPass, resetLocal, DEFAULT_PASS,
   };
 })();

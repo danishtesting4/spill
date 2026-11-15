@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Confessions — SPILL</title>
+<meta name="description" content="The confession wall: things people did, felt or never said out loud, posted without a name." />
+<meta name="theme-color" content="#07060b" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2307060b'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%2338f5d0'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ff3d84'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-wall="confession">
+<div class="aurora" aria-hidden="true"><span class="orb orb-a"></span><span class="orb orb-b"></span><span class="orb orb-c"></span></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="staticbar">
+  <span class="staticbar-dot"></span>
+  <span><b>static build</b> — this wall is published from <i>data/wall.json</i>; your own drafts stay in your browser.</span>
+  <a href="index.html#rules">how publishing works</a>
+</div>
+
+<header class="topbar">
+  <a class="wordmark" href="index.html"><span class="dot"></span>SPILL</a>
+  <nav class="topnav">
+    <a href="index.html">Mixed wall</a>
+    <a href="confessions.html" class="is-current">Confessions</a>
+    <a href="exposes.html">Exposés</a>
+    <a href="admin.html">Desk</a>
+  </nav>
+  <a class="btn btn-primary" href="index.html#compose">Confess something</a>
+</header>
+
+<main>
+  <section class="wall-hero">
+    <p class="eyebrow"><span class="pulse"></span> the confession wall</p>
+    <h1>Things people did,<br /><em>said, or never admitted.</em></h1>
+    <p class="lede">
+      Confessions only — no targets, no company exposés, no receipts. Just the stuff someone needed
+      to put down somewhere at 2am. Every post below was read by a human before it appeared.
+    </p>
+    <dl class="stats">
+      <div><dt>on this wall</dt><dd id="statLive">–</dd></div>
+      <div><dt>reactions</dt><dd id="statReactions">–</dd></div>
+      <div><dt>this week</dt><dd id="statWeek">–</dd></div>
+    </dl>
+  </section>
+
+  <section class="feed">
+    <div class="feed-head">
+      <h2>All confessions</h2>
+      <div class="feed-tools">
+        <div class="segmented" role="tablist" aria-label="Sort">
+          <button role="tab" aria-selected="true" data-sort="new">Newest</button>
+          <button role="tab" aria-selected="false" data-sort="felt">Most felt</button>
+        </div>
+        <label class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="search" type="search" placeholder="search confessions" aria-label="Search confessions" />
+        </label>
+      </div>
+    </div>
+    <div class="cards" id="wall" aria-live="polite"></div>
+    <p class="empty" id="empty" hidden></p>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>SPILL — confessions are anonymous by construction: no accounts, no names, no IP kept.</span>
+  <a href="exposes.html">see the exposé wall →</a>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+<script src="store.js"></script>
+<script src="wall.js"></script>
+</body>
+</html>

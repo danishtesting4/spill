@@ -7,16 +7,18 @@
 <meta name="robots" content="noindex" />
 <link rel="stylesheet" href="styles.css" />
 <style>
-  .desk { max-width: 1100px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 40px) 80px; }
+  .desk { max-width: 1120px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 40px) 80px; }
   .login { max-width: 420px; margin: 14vh auto; padding: 32px; border: 1px solid var(--line); border-radius: 22px;
     background: linear-gradient(180deg, #16121f, #0d0a15); box-shadow: 0 40px 120px -40px #000; }
   .login h1 { font-size: 1.6rem; margin-bottom: 8px; }
   .login p { color: var(--muted); font-size: 13.5px; margin-bottom: 22px; }
   .desk-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
   .desk-head h1 { font-size: 1.5rem; margin-right: auto; }
-  .desk-stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 24px 0; }
+  .desk-stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 24px 0 6px; }
   .chip { font-size: 12.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; background: rgba(255,255,255,.035); }
   .chip b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .chip.conf b { color: var(--cyan); }
+  .chip.exp b { color: var(--magenta); }
   .qcard { border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 14px;
     background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.012)), var(--panel-solid); }
   .qcard.flagged { border-color: rgba(255, 204, 102, .45); }
@@ -32,10 +34,27 @@
   .recent-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--line);
     border-radius: 12px; margin-bottom: 8px; font-size: 13px; background: rgba(255,255,255,.025); }
   .recent-row .ttl { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .tabs { display: flex; gap: 8px; margin: 24px 0 18px; }
+  .tabs { display: flex; gap: 8px; margin: 24px 0 18px; flex-wrap: wrap; }
   .tabs button { border: 1px solid var(--line); background: rgba(255,255,255,.03); color: var(--muted); padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 650; }
   .tabs button.on { color: #06070c; background: var(--ink); border-color: transparent; }
+  .tabs button .n { opacity: .6; margin-left: 6px; font-variant-numeric: tabular-nums; }
   .section-title { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted-2); font-weight: 700; margin: 26px 0 12px; }
+
+  /* live wall browser */
+  .live-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  .live-row { border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin-bottom: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)), var(--panel-solid); }
+  .live-row.is-hidden { opacity: .48; border-style: dashed; }
+  .live-row.is-expose { border-left: 3px solid var(--magenta); }
+  .live-row.is-confession { border-left: 3px solid var(--cyan); }
+  .live-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .live-row h3 { font-size: 1rem; line-height: 1.35; margin-bottom: 6px; }
+  .live-body { font-size: 13.5px; color: #c6bfdc; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .live-row.open .live-body { -webkit-line-clamp: unset; display: block; }
+  .live-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+  .stat-mini { font-size: 11.5px; color: var(--muted-2); font-variant-numeric: tabular-nums; }
+  .empty-note { color: var(--muted-2); font-size: 13.5px; padding: 30px 0; }
 </style>
 </head>
 <body>
@@ -53,13 +72,13 @@
   </label>
   <p class="form-error" id="loginError" hidden></p>
   <button class="btn btn-primary btn-lg" id="loginBtn" style="width:100%;margin-top:8px">Open the desk</button>
-  <p class="hint" style="margin-top:16px">Default password: <code style="color:var(--cyan)">nightfall</code> — change it below once you’re in.</p>
+  <p class="hint" style="margin-top:16px">Default password: <code style="color:var(--cyan)">nightfall</code> — change it under Settings once you’re in.</p>
 </section>
 
 <main class="desk" id="desk" hidden>
   <div class="desk-head">
-    <h1>Review queue</h1>
-    <span class="chip">live drops <b id="countApproved">0</b></span>
+    <h1>Moderation desk</h1>
+    <a class="btn btn-ghost" href="index.html">View site</a>
     <button class="btn btn-ghost" id="refresh">Refresh</button>
     <button class="btn btn-ghost" id="logout">Sign out</button>
   </div>
@@ -67,27 +86,69 @@
   <div class="desk-stats" id="deskStats"></div>
 
   <div class="tabs">
-    <button class="on" data-tab="queue">Queue</button>
-    <button data-tab="recent">Recent decisions</button>
-    <button data-tab="publish">Publish</button>
+    <button class="on" data-tab="queue">Queue <span class="n" id="nQueue"></span></button>
+    <button data-tab="confessions">Confessions <span class="n" id="nConf"></span></button>
+    <button data-tab="exposes">Exposés <span class="n" id="nExp"></span></button>
+    <button data-tab="recent">Log</button>
+    <button data-tab="publish">Publish &amp; settings</button>
   </div>
 
+  <!-- queue -->
   <div id="queueWrap">
     <div class="section-title">Waiting on a human</div>
     <div id="queue"></div>
   </div>
 
+  <!-- live walls -->
+  <div id="confessionsWrap" hidden>
+    <div class="section-title">Live on the confession wall</div>
+    <div class="live-tools">
+      <div class="segmented" role="tablist" aria-label="Sort">
+        <button role="tab" aria-selected="true" data-sort="new">Newest</button>
+        <button role="tab" aria-selected="false" data-sort="felt">Most felt</button>
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input class="live-search" data-kind="confession" type="search" placeholder="search confessions" />
+      </label>
+      <span class="stat-mini" id="confSummary"></span>
+    </div>
+    <div id="confessionsList"></div>
+  </div>
+
+  <div id="exposesWrap" hidden>
+    <div class="section-title">Live on the exposé wall</div>
+    <p class="hint" style="margin-bottom:14px;max-width:76ch">
+      Claims against companies, organisations and public figures. If one of these is unsafe, wrong or
+      names a private person, hide it here and it drops out of the next <code>wall.json</code> export.
+    </p>
+    <div class="live-tools">
+      <div class="segmented" role="tablist" aria-label="Sort">
+        <button role="tab" aria-selected="true" data-sort="new">Newest</button>
+        <button role="tab" aria-selected="false" data-sort="felt">Most felt</button>
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input class="live-search" data-kind="expose" type="search" placeholder="search exposés" />
+      </label>
+      <span class="stat-mini" id="exposeSummary"></span>
+    </div>
+    <div id="exposesList"></div>
+  </div>
+
+  <!-- recent decisions -->
   <div id="recentWrap" hidden>
     <div class="section-title">Last 40 decisions</div>
     <div id="recent"></div>
   </div>
 
+  <!-- publish + settings -->
   <div id="publishWrap" hidden>
     <div class="section-title">Turn approved drops into the public wall</div>
     <p class="hint" style="margin-bottom:14px;max-width:74ch">
-      Everything approved in this browser gets merged with the current <code>data/wall.json</code>.
-      Copy the result, paste it over <code>data/wall.json</code> in your repo, commit — GitHub Pages
-      rebuilds in about a minute and the drops appear for every visitor.
+      Everything approved in this browser gets merged with the current <code>data/wall.json</code> —
+      minus anything you hid above. Copy the result over <code>data/wall.json</code> in your repo and commit;
+      Pages rebuilds in about a minute.
     </p>
     <div class="qactions" style="border:0;padding:0;margin-bottom:12px">
       <button class="btn btn-primary" id="genWall">Generate wall.json</button>

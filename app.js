@@ -468,3 +468,9 @@ setType('confession');
 updateCounts();
 loadFeed();
 loadStats();
+
+/* arriving from a wall page via "Spill something" */
+if (location.hash === '#compose') {
+  resetComposer();
+  openModal('composer');
+}

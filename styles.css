@@ -732,3 +732,36 @@ code {
 .publish-alt em { font-style: normal; color: var(--cyan); font-weight: 650; }
 
 .status.expired { background: rgba(164, 156, 190, 0.16); color: #c3bcd8; border: 1px solid rgba(164, 156, 190, 0.35); }
+
+/* ── standalone walls (confessions.html / exposes.html) ─── */
+.topnav a.is-current { color: var(--ink); position: relative; }
+.topnav a.is-current::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -7px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+}
+.topnav a.is-current.expose::after { background: var(--magenta); box-shadow: 0 0 10px var(--magenta); }
+
+.wall-hero { padding: clamp(44px, 8vw, 92px) 0 clamp(24px, 4vw, 40px); }
+.wall-hero h1 { font-size: clamp(2.1rem, 5.6vw, 3.7rem); max-width: 22ch; }
+.wall-hero.is-expose h1 em {
+  background: linear-gradient(96deg, var(--magenta), var(--violet) 58%, var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.wall-hero .stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 34px; }
+.wall-note {
+  margin-top: 24px;
+  padding-left: 14px;
+  border-left: 2px solid rgba(255, 61, 132, 0.55);
+  max-width: 62ch;
+  font-size: 13px;
+  color: var(--muted);
+}
+.wall-note b { color: var(--ink); }
+.cards.compact { columns: 3; }
