@@ -145,23 +145,5 @@
   "oof": 88,
   "createdAt": 1794606955809,
   "source": "published"
- },
- {
-  "id": "p9",
-  "code": "published",
-  "type": "confession",
-  "title": "[TEST] deployment check, please ignore",
-  "body": "This is an automated smoke test of the SPILL pipeline. It should be scrubbed, queued, approved, published and then removed again. Contact me at [email removed] or [number removed] if it does not.",
-  "alias": "feverish harbour #12",
-  "tags": [
-   "test",
-   "deployment"
-  ],
-  "status": "approved",
-  "felt": 0,
-  "same": 0,
-  "oof": 0,
-  "createdAt": 1794719222535,
-  "source": "published"
  }
 ]
